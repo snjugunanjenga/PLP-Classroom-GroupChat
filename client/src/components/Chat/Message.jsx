@@ -1,16 +1,29 @@
+import { useAuth } from '../../context/AuthContext';
+import { Avatar } from '../UI/Avatar';
+
 const Message = ({ message }) => {
-  const isSender = message.sender === 'You'; // Replace with real user check later
+  const { user } = useAuth();
+  const isSender = user && (message?.sender?.username === user.username || message?.sender === user.username);
+  const senderName = message?.sender?.username || message?.sender || 'Unknown';
+  const timestamp = message?.timestamp ? new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
   return (
-    <div className={`mb-3 flex ${isSender ? 'justify-end' : 'justify-start'}`}>
+    <div className={`mb-3 flex items-end ${isSender ? 'justify-end' : 'justify-start'}`}>
+      {!isSender && (
+        <Avatar name={senderName} className="bg-gray-700 text-gray-300 w-8 h-8 mr-2" />
+      )}
       <div
-        className={`max-w-xs p-3 rounded-lg ${
-          isSender ? 'bg-green-100 text-right' : 'bg-white text-left'
+        className={`max-w-xs p-3 rounded-lg relative ${
+          isSender ? 'bg-green-700 text-white rounded-br-none' : 'bg-gray-800 text-gray-200 rounded-bl-none'
         } shadow-sm`}
       >
-        <p className="text-sm text-gray-500 mb-1">{message.sender}</p>
-        <p className="text-gray-800">{message.content}</p>
-        {/* Add timestamp and reactions later */}
+        <p className="text-xs text-gray-400 mb-1">{senderName}</p>
+        <p className="text-base break-words mb-1">{message?.content || ''}</p>
+        <span className="absolute bottom-1 right-2 text-[10px] text-gray-400">{timestamp}</span>
       </div>
+      {isSender && (
+        <Avatar name={senderName} className="bg-green-900 text-green-200 w-8 h-8 ml-2" />
+      )}
     </div>
   );
 };

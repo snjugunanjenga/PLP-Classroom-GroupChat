@@ -10,6 +10,8 @@ const messageRoutes = require('./routes/messages');
 const { verifyToken } = require('./utils/jwt');
 const Group = require('./models/Group');
 const Message = require('./models/Message');
+const User = require('./models/User');
+const morgan = require('morgan');
 
 const app = express();
 const server = http.createServer(app);
@@ -22,6 +24,7 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
+app.use(morgan('combined'));
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/classroom-chat', {
@@ -33,6 +36,7 @@ mongoose.connect('mongodb://localhost:27017/classroom-chat', {
 
 // Middleware for Socket.io authentication
 const userSockets = {};
+const onlineUsers = new Set();
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
   if (!token) return next(new Error('Authentication error'));
@@ -49,10 +53,13 @@ io.use((socket, next) => {
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.user.username}`);
   userSockets[socket.user.id] = socket.id;
+  onlineUsers.add(socket.user.id);
+  io.emit('user-online', socket.user.id);
 
   socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.user.username}`);
+    onlineUsers.delete(socket.user.id);
     delete userSockets[socket.user.id];
+    io.emit('user-offline', socket.user.id);
   });
 
   // Join/leave groups
@@ -78,7 +85,8 @@ io.on('connection', (socket) => {
     try {
       const group = await Group.findById(groupId);
       if (!group || !group.members.includes(socket.user.id)) return socket.emit('error', 'Invalid group');
-      const message = new Message({ sender: socket.user.id, group: groupId, content });
+      const unreadBy = group.members.filter(id => id.toString() !== socket.user.id);
+      const message = new Message({ sender: socket.user.id, group: groupId, content, unreadBy });
       await message.save();
       io.to(groupId).emit('new group message', message);
     } catch (error) {
@@ -153,5 +161,22 @@ app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/messages', messageRoutes);
 
+// Endpoint to get all currently online users
+app.get('/api/users/online', (req, res) => {
+  res.json(Array.from(onlineUsers));
+});
+
+// Endpoint to get all users (for private messaging)
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find({}, '_id username');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+module.exports = app;

@@ -41,4 +41,17 @@ router.post('/mark-read/:messageId', authMiddleware, async (req, res) => {
   }
 });
 
+router.post('/group/:groupId/mark-read', authMiddleware, async (req, res) => {
+  try {
+    await Message.updateMany(
+      { group: req.params.groupId, unreadBy: req.user.id },
+      { $pull: { unreadBy: req.user.id } }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
+module.exports.messagesRouter = router;
