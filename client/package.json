@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest",
+    "render-preview": "vite preview --host 0.0.0.0 --port $PORT"
   },
   "dependencies": {
     "@radix-ui/react-icons": "^1.3.2",
