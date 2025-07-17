@@ -12,6 +12,10 @@ const Login = ({ onSwitchToRegister }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (!username || !password) {
+      setError('Username and password are required');
+      return;
+    }
     try {
       await login(username, password);
       // Redirect handled by Auth.jsx or routing

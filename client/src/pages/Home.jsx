@@ -11,6 +11,7 @@ const Home = () => {
   const [messages, setMessages] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const [privateChatUser, setPrivateChatUser] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   const fetchChats = async () => {
     const { data } = await api.get('/api/groups');
@@ -20,6 +21,27 @@ const Home = () => {
   useEffect(() => {
     fetchChats();
   }, []);
+
+  useEffect(() => {
+    const fetchOnline = async () => {
+      try {
+        const { data } = await api.get('/api/users/online');
+        setOnlineUsers(data);
+      } catch {
+        setOnlineUsers([]);
+      }
+    };
+    fetchOnline();
+    if (!socket) return;
+    const handleUserOnline = (userId) => setOnlineUsers((prev) => [...new Set([...prev, userId])]);
+    const handleUserOffline = (userId) => setOnlineUsers((prev) => prev.filter((id) => id !== userId));
+    socket.on('user-online', handleUserOnline);
+    socket.on('user-offline', handleUserOffline);
+    return () => {
+      socket.off('user-online', handleUserOnline);
+      socket.off('user-offline', handleUserOffline);
+    };
+  }, [socket]);
 
   useEffect(() => {
     if (socket && currentChat && !privateChatUser) {
@@ -84,6 +106,7 @@ const Home = () => {
         privateChatUser={privateChatUser}
         messages={messages}
         typingUsers={typingUsers}
+        onlineUsers={onlineUsers}
       />
     </div>
   );

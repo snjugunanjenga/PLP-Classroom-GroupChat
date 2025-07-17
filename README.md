@@ -1,33 +1,24 @@
-# Classroom Group Chat App
+# PLP Classroom Group Chats
 
-A real-time, WhatsApp-inspired chat application for classroom groups, built with the MERN stack (MongoDB, Express.js, React, Node.js) and Socket.io. Designed for students and teachers to communicate in groups or privately, with a modern, responsive UI and secure authentication.
-
----
+Welcome to **PLP Classroom Group Chats** – a modern, real-time chat platform designed for students and educators to collaborate, communicate, and learn together!
 
 ## Features
-- **User Authentication:** JWT-based login/register (username & password)
-- **Group Chats:** Create, join, leave, and manage classroom groups
-- **Private Messaging:** 1:1 real-time chat between users
-- **Real-Time Messaging:** Powered by Socket.io
-- **Typing Indicators:** See when others are typing
-- **Online/Offline Status:** See who is online
-- **Unread Message Badges:** WhatsApp-style indicators
-- **Group Admin Controls:** Remove members, transfer admin rights
-- **Responsive UI:** WhatsApp-like layout, mobile-friendly, dark theme
-- **Error Boundaries:** Robust error handling in the UI
-- **Testing:** Backend (Jest, Supertest) and frontend (React Testing Library)
+- Create and join group chats for your classroom or study group
+- Share messages in real-time with group members
+- See who is online and who is typing
+- Invite others to groups using a unique Group ID
+- Private messaging between users
+- Modern, responsive chat interface
 
----
+## Screenshots
 
-## Tech Stack
-- **Frontend:** React, Vite, TailwindCSS, shadcn-ui, Socket.io-client
-- **Backend:** Node.js, Express.js, Socket.io, MongoDB (Mongoose)
-- **Testing:** Jest, Supertest, React Testing Library
-- **Deployment:** Render.com
+### Home Page
+![Home Page](./screenshots/HomePage.PNG)
 
----
+### Group Chat Interface
+![Chat Interface](./screenshots/ChatInterface.PNG)
 
-## Getting Started
+## Installation
 
 ### Prerequisites
 - Node.js (v18+ recommended)
@@ -71,44 +62,35 @@ cd client
 pnpm run dev
 ```
 
----
+The backend will run on `http://localhost:5000` and the frontend on `http://localhost:5173` by default.
 
-## Testing
-**Backend:**
-```sh
-cd server
-pnpm test
-```
-**Frontend:**
-```sh
-cd client
-pnpm test
-```
+## Getting Started
+1. **Register or login** to your account.
+2. **Create a new group** or **join an existing group** using a Group ID.
+3. **Share the Group ID** with classmates to invite them.
+4. **Start chatting!** See who is online and typing in real-time.
+5. **Switch between groups and private chats** using the chat list.
 
----
+## Tutorials
+- Click the "How to use the app" button on the login page for a step-by-step guide.
+- For more detailed help, see the [Help](#help) section below.
 
-## Deployment (Render.com)
-- Deploy `server` and `client` as separate services.
-- Set environment variables in Render dashboard:
-  - **Server:** `JWT_SECRET`, `MONGODB_URI`
-  - **Client:** `VITE_API_URL` (pointing to your Render backend URL)
-- Build/Start commands:
-  - **Server:**
-    - Build: `pnpm install`
-    - Start: `node index.js`
-  - **Client:**
-    - Build: `pnpm install && pnpm run build`
-    - Start: `pnpm run preview`
-- WebSocket support is enabled by default on Render.
+## Footer Links
 
----
+### Help
+If you need assistance using PLP Classroom Group Chats:
+- Click the "How to use the app" button on the login page for a quick tutorial.
+- For technical issues, contact your class administrator or email support at `support@plpclassroom.com`.
+- Common issues include: login problems, group joining errors, or connection issues. Try refreshing the page or checking your internet connection.
 
-## Screenshots
-Add screenshots of the app here (login, chat, group management, etc.)
+### About Us
+PLP Classroom Group Chats is a project by the PLP community to foster better communication and collaboration among students and educators. Our mission is to make group learning interactive, accessible, and fun for everyone.
+
+For more information, visit our website or reach out to us at `info@plpclassroom.com`.
 
 ---
 ## Author : Cpt N
 
 
 ## License
-MIT 
+MIT &copy; {new Date().getFullYear()} PLP Classroom Group Chats. All rights reserved. 

@@ -4,7 +4,7 @@ import Message from './Message';
 import { Input } from '../UI/Input';
 import { Button } from '../UI/Button';
 
-const ChatWindow = ({ currentChat, privateChatUser, messages, typingUsers }) => {
+const ChatWindow = ({ currentChat, privateChatUser, messages, typingUsers, onlineUsers = [] }) => {
   const socket = useSocket();
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -72,15 +72,49 @@ const ChatWindow = ({ currentChat, privateChatUser, messages, typingUsers }) => 
         <h1 className="text-xl font-semibold text-white truncate">
           {privateChatUser ? privateChatUser.username : currentChat?.name || 'Select a chat'}
         </h1>
+        {/* Show Group ID and Copy button if in group chat */}
+        {!privateChatUser && currentChat?.groupId && (
+          <div className="ml-4 flex items-center">
+            <span className="text-xs text-green-200 bg-green-800 px-2 py-1 rounded select-all">ID: {currentChat.groupId}</span>
+            <button
+              className="ml-2 px-2 py-1 text-xs bg-green-700 text-white rounded hover:bg-green-800"
+              onClick={() => {navigator.clipboard.writeText(currentChat.groupId)}}
+              title="Copy Group ID"
+            >
+              Copy
+            </button>
+          </div>
+        )}
+        {/* Online status for group chat */}
+        {!privateChatUser && currentChat?.members && onlineUsers.length > 0 && (
+          (() => {
+            const onlineGroupMembers = currentChat.members.filter(
+              m => onlineUsers.includes(m._id || m) // m can be object or id
+            );
+            return onlineGroupMembers.length > 0 ? (
+              <span className="ml-4 flex items-center text-green-200 text-xs">
+                <span className="w-2 h-2 bg-green-400 rounded-full mr-1 inline-block"></span>
+                Online
+              </span>
+            ) : null;
+          })()
+        )}
       </div>
       <div className="flex-1 p-4 overflow-y-auto bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-100" style={{ backgroundSize: 'auto' }}>
         {messages.map((msg) => (
           <Message key={msg._id} message={msg} />
         ))}
         {typingUsers.length > 0 && (
-          <p className="text-sm text-green-600 italic mt-2">
-            {typingUsers.join(', ')} {typingUsers.length > 1 ? 'are' : 'is'} typing...
-          </p>
+          <div className="flex items-center mt-2">
+            <span className="text-sm text-green-600 italic mr-2">
+              {typingUsers.join(', ')} {typingUsers.length > 1 ? 'are' : 'is'} typing...
+            </span>
+            <span className="flex space-x-1">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></span>
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+            </span>
+          </div>
         )}
       </div>
       {(currentChat || privateChatUser) && (

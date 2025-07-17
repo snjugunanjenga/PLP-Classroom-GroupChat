@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import api from '../../utils/api';
 import { useSocket } from '../../context/SocketContext';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const ChatList = ({ chats, onSelectChat, refetchChats, onSelectPrivate }) => {
   const [unreadCounts, setUnreadCounts] = useState({});
@@ -11,9 +12,10 @@ const ChatList = ({ chats, onSelectChat, refetchChats, onSelectPrivate }) => {
   const [joinGroupId, setJoinGroupId] = useState('');
   const socket = useSocket();
   const [users, setUsers] = useState([]);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [settingsGroup, setSettingsGroup] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUnreadCounts = async () => {
@@ -76,9 +78,14 @@ const ChatList = ({ chats, onSelectChat, refetchChats, onSelectPrivate }) => {
 
   const handleJoinGroup = async () => {
     if (!joinGroupId) return;
-    await api.post(`/api/groups/${joinGroupId}/join`);
-    setJoinGroupId('');
-    refetchChats();
+    try {
+      await api.post('/api/groups/join', { groupId: joinGroupId });
+      alert('Successfully joined group!');
+      setJoinGroupId('');
+      refetchChats();
+    } catch (err) {
+      alert('Failed to join group. Please check the Group ID.');
+    }
   };
 
   const handleLeaveGroup = async (chat) => {
@@ -107,9 +114,22 @@ const ChatList = ({ chats, onSelectChat, refetchChats, onSelectPrivate }) => {
     closeSettings();
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/auth');
+  };
+
   return (
-    <div className="w-1/4 min-w-[250px] max-w-xs bg-transparent border-r border-gray-800 p-4 overflow-y-auto h-full max-h-screen md:w-1/4 sm:w-full sm:max-w-full sticky top-0 z-20">
-      <h2 className="text-xl font-semibold mb-4 text-green-400">Chats</h2>
+    <div className="w-1/4 min-w-[250px] max-w-xs bg-gray-800 border-r border-gray-800 p-4 overflow-y-auto h-full max-h-screen md:w-1/4 sm:w-full sm:max-w-full sticky top-0 z-20">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-green-400">Chats</h2>
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
+      </div>
       <div className="mb-4 flex flex-col gap-2">
         <input
           type="text"
@@ -140,8 +160,11 @@ const ChatList = ({ chats, onSelectChat, refetchChats, onSelectPrivate }) => {
               className="flex items-center p-3 cursor-pointer hover:bg-green-900 active:bg-green-800 rounded-lg transition-colors group"
             >
               <Avatar name={u.username} className="bg-gray-700 text-gray-300" />
-              <div className="ml-3 flex-1">
+              <div className="ml-3 flex-1 flex items-center">
                 <p className="font-medium text-gray-200 truncate">{u.username}</p>
+                {onlineUsers.includes(u._id) && (
+                  <span className="w-2 h-2 bg-green-400 rounded-full ml-2 inline-block" title="Online"></span>
+                )}
               </div>
             </div>
           ))}

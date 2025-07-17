@@ -17,7 +17,7 @@ router.post('/', authMiddleware, async (req, res) => {
     const { name } = req.body;
     const group = new Group({ name, members: [req.user.id], admin: req.user.id });
     await group.save();
-    res.status(201).json(group);
+    res.status(201).json(group); // group now includes groupId
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -31,6 +31,30 @@ router.get('/unread-counts', authMiddleware, async (req, res) => {
       counts[group._id] = await require('../models/Message').countDocuments({ group: group._id, unreadBy: req.user.id });
     }
     res.json(counts);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.post('/join', authMiddleware, async (req, res) => {
+  try {
+    const { groupId } = req.body;
+    const group = await Group.findOne({ groupId });
+    if (!group) return res.status(404).json({ message: 'Group not found' });
+    let joined = false;
+    if (!group.members.includes(req.user.id)) {
+      group.members.push(req.user.id);
+      await group.save();
+      joined = true;
+    }
+    // Emit socket event to the user if joined
+    if (joined) {
+      const io = req.app.get('io');
+      if (io && io.userSockets && io.userSockets[req.user.id]) {
+        io.to(io.userSockets[req.user.id]).emit('joined group notification', { group });
+      }
+    }
+    res.json(group);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }

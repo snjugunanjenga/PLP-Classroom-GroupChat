@@ -16,6 +16,10 @@ export const SocketProvider = ({ children }) => {
         auth: { token: localStorage.getItem('token') },
       });
       setSocket(newSocket);
+      // Listen for join group notification
+      newSocket.on('joined group notification', ({ group }) => {
+        alert(`You have joined the group: ${group.name}`);
+      });
       return () => newSocket.close();
     }
   }, [user]);
